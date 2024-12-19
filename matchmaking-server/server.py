@@ -10,11 +10,17 @@ import asyncio
 from websockets.asyncio.server import serve, broadcast
 import http
 
-# set these environment variables
+# these environment variables are required:
 # AB_BASE_URL
 # AB_NAMESPACE
 # AB_CLIENT_ID
 # AB_CLIENT_SECRET
+
+# these environment variables are optional:
+# CLAIM_KEYS (default: "default")
+# REGIONS (default: "us-west-2, us-east-1")
+default_claim_keys = os.environ.get("CLAIM_KEYS", "default").split(",")
+default_regions = os.environ.get("REGIONS", "us-west-2, us-east-1").split(",")
 
 CONNECTIONS = set()
 stop = False
@@ -40,7 +46,7 @@ async def matchmaker():
             print("Match found! Requesting server...")
             next_two = list(CONNECTIONS)[:2]
             broadcast(next_two, "Match found! Requesting server...")
-            host_port = claim()
+            host_port = claim(default_claim_keys, default_regions)
             if not host_port:
                 print("No server available. Waiting...")
                 broadcast(next_two, "No server available. Waiting...")
@@ -54,8 +60,8 @@ async def matchmaker():
         await asyncio.sleep(2)
 
 
-def claim():
-    body = ApiFleetClaimByKeysReq().with_claim_keys(["pong"]).with_regions(["us-west-2"]).with_session_id("none")
+def claim(claim_keys, regions, session_id="none"):
+    body = ApiFleetClaimByKeysReq().with_claim_keys(claim_keys).with_regions(regions).with_session_id(session_id)
     result, err = fleet_claim_by_keys(body=body)
     print(result, err)
     if err:
@@ -87,6 +93,11 @@ async def main():
 def health_check(connection, request):
     if request.path == "/healthz":
         return connection.respond(http.HTTPStatus.OK, "OK\n")
+    if request.path == "/test-claim":
+        result = claim(default_claim_keys, default_regions)
+        if not result:
+            return connection.respond(http.HTTPStatus.NOT_FOUND, "No servers available\n")
+        return connection.respond(http.HTTPStatus.OK, "server available at: "+result+"\n")
 
 
 if __name__ == "__main__":
