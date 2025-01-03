@@ -46,6 +46,8 @@ async def matchmaker():
             print("Match found! Requesting server...")
             next_two = list(CONNECTIONS)[:2]
             broadcast(next_two, "Match found! Requesting server...")
+            # normally, the ordered list of regions to try to get a server from would come from the game client's matchmaking request
+            # for this example, we keep the matchmaking logic super simple and just use a default list of regions
             host_port = claim(default_claim_keys, default_regions)
             if not host_port:
                 print("No server available. Waiting...")
