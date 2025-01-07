@@ -1,5 +1,6 @@
 import os
 import signal
+import json
 
 import accelbyte_py_sdk
 from accelbyte_py_sdk.core import MyConfigRepository
@@ -45,17 +46,20 @@ async def matchmaker():
         while len(CONNECTIONS) >= 2:
             print("Match found! Requesting server...")
             next_two = list(CONNECTIONS)[:2]
-            broadcast(next_two, "Match found! Requesting server...")
+            match_message = json.dumps({"type": "OnMatchFound", "message": "Match found! Requesting server..."})
+            broadcast(next_two, match_message)
             # normally, the ordered list of regions to try to get a server from would come from the game client's matchmaking request
             # and is based on client ping times to each region.  
             # For this example, we keep the matchmaking logic super simple and just use a default list of regions
             host_port = claim(default_claim_keys, default_regions)
             if not host_port:
                 print("No server available. Waiting...")
-                broadcast(next_two, "No server available. Waiting...")
+                match_message = json.dumps({"type": "OnMatchError", "message": "No server available. Waiting..."})
+                broadcast(next_two, match_message)
                 break
             print("Server found! Connecting players...")
-            broadcast(next_two, host_port)
+            match_message = json.dumps({"type": "OnServerClaimed", "message": host_port})
+            broadcast(next_two, match_message)
             await asyncio.sleep(0.1)  # so the message gets sent before closing the connection
             for ws in next_two:
                 await ws.close()
