@@ -62,7 +62,7 @@ async def matchmaker():
                 broadcast(matched_clients, match_message)
                 break
             print("Server found! Connecting players...")
-            match_message = json.dumps({"type": "OnServerClaimed", "message": host_port})
+            match_message = json.dumps({"type": "OnServerReady", "message": host_port})
             broadcast(matched_clients, match_message)
             await asyncio.sleep(0.1)  # so the message gets sent before closing the connection
             for ws in matched_clients:
