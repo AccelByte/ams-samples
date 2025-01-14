@@ -41,7 +41,8 @@ async def register(websocket):
     # That is out of the scope of this example.
     CONNECTIONS.add(websocket)
     try:
-        await websocket.send("Waiting for match...")
+        match_message = json.dumps({"type": "OnFindingMatch", "message": "Waiting for match.."})
+        await websocket.send(match_message)
         await websocket.wait_closed()
     finally:
         CONNECTIONS.remove(websocket)
@@ -54,7 +55,7 @@ async def matchmaker():
             print("Match found! Requesting server...")
             matched_clients = list(CONNECTIONS)[:match_size]
             match_message = json.dumps({"type": "OnMatchFound", "message": "Match found! Requesting server..."})
-            broadcast(matched_clients, "Match found! Requesting server...")
+            broadcast(matched_clients, match_message)
             # normally, the ordered list of regions to try to get a server from would come from the game client's matchmaking request
             # and is based on client ping times to each region.  
             # For this example, we keep the matchmaking logic super simple and just use a default list of regions
