@@ -21,7 +21,7 @@ import http
 # REGIONS (default: "us-west-2, us-east-1")
 # LOCAL_SERVER (set this to the IP:PORT of a local server to always return that server's IP:PORT to clients instead of claiming a server from AMS)
 default_claim_keys = os.environ.get("CLAIM_KEYS", "default").split(",")
-default_regions = os.environ.get("REGIONS", "us-west-2, us-east-1").split(",")
+default_regions = os.environ.get("REGIONS", "us-west-2,us-east-1").split(",")
 localServer = os.environ.get("LOCAL_SERVER")
 
 CONNECTIONS = set()
