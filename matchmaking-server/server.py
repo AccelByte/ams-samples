@@ -36,6 +36,9 @@ def sigterm_handler(sig, frame):
 
 async def register(websocket):
     print("New connection")
+    # normally you would want to validate the client is authorized to matchmake by checking a token it provides to confirm the player's logged in identity
+    # and make sure the player isn't already in the matchmaking pool, ect., in order to prevent an attacker from easily claiming all of the servers.
+    # That is out of the scope of this example.
     CONNECTIONS.add(websocket)
     try:
         await websocket.send("Waiting for match...")
