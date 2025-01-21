@@ -1,6 +1,7 @@
 # Sample Matchmaking Server
 
-This directory contains a very simple matchmaking app that uses AMS as a dedicated server provider.
+This directory contains a very simple matchmaking app that uses AMS as a dedicated server (DS) provider.
+The server listens for websocket connections, and when two clients are connected it will match them together, request a DS from AMS, and when it gets one it will send the connection info to the clients close the websocket.
 
 This README explains how to build the Docker container and run the matchmaking server locally.
 
