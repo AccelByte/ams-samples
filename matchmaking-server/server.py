@@ -47,6 +47,7 @@ async def register(websocket):
 
 
 async def matchmaker():
+    print("matchmaker started")
     while not stop:
         match_size = 2
         while len(CONNECTIONS) >= match_size:
