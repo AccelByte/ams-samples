@@ -62,7 +62,7 @@ async def matchmaker():
             host_port = claim(default_claim_keys, default_regions)
             if not host_port:
                 print("No server available. Waiting...")
-                match_message = json.dumps({"type": "OnMatchError", "message": "No server available. Waiting..."})
+                match_message = json.dumps({"type": "OnServerClaimFailed", "message": "No server available. Waiting..."})
                 broadcast(matched_clients, match_message)
                 break
             print("Server found! Connecting players...")

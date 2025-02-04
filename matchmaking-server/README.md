@@ -40,7 +40,7 @@ Your local game client can now connect to `ws://localhost:8080` for matchmaking.
 ## Optional Environment Variables
 
 - `CLAIM_KEYS`: The list of claim keys to use for the AMS claim request (default: "default")
-- `REGIONS`: The list of regions to use for the AMS claim request (default: "us-west-2, us-east-1")
+- `REGIONS`: The list of regions to use for the AMS claim request (default: "us-west-2,us-east-1")
 - `LOCAL_SERVER`: For easier testing of your local game integration with this sample server set this to the IP:PORT you want it to return clients instead of claiming a server from AMS
 
 ## Stopping the Docker Container
