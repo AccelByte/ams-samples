@@ -1,5 +1,6 @@
 import os
 import signal
+import json
 
 import accelbyte_py_sdk
 from accelbyte_py_sdk.core import MyConfigRepository
@@ -21,7 +22,7 @@ import http
 # REGIONS (default: "us-west-2, us-east-1")
 # LOCAL_SERVER (set this to the IP:PORT of a local server to always return that server's IP:PORT to clients instead of claiming a server from AMS)
 default_claim_keys = os.environ.get("CLAIM_KEYS", "default").split(",")
-default_regions = os.environ.get("REGIONS", "us-west-2, us-east-1").split(",")
+default_regions = os.environ.get("REGIONS", "us-west-2,us-east-1").split(",")
 localServer = os.environ.get("LOCAL_SERVER")
 
 CONNECTIONS = set()
@@ -40,7 +41,8 @@ async def register(websocket):
     # That is out of the scope of this example.
     CONNECTIONS.add(websocket)
     try:
-        await websocket.send("Waiting for match...")
+        match_message = json.dumps({"type": "OnFindingMatch", "message": "Waiting for match.."})
+        await websocket.send(match_message)
         await websocket.wait_closed()
     finally:
         CONNECTIONS.remove(websocket)
@@ -53,17 +55,20 @@ async def matchmaker():
         while len(CONNECTIONS) >= match_size:
             print("Match found! Requesting server...")
             matched_clients = list(CONNECTIONS)[:match_size]
-            broadcast(matched_clients, "Match found! Requesting server...")
+            match_message = json.dumps({"type": "OnMatchFound", "message": "Match found! Requesting server..."})
+            broadcast(matched_clients, match_message)
             # normally, the ordered list of regions to try to get a server from would come from the game client's matchmaking request
             # and is based on client ping times to each region.  
             # For this example, we keep the matchmaking logic super simple and just use a default list of regions
             host_port = claim(default_claim_keys, default_regions)
             if not host_port:
                 print("No server available. Waiting...")
-                broadcast(matched_clients, "No server available. Waiting...")
+                match_message = json.dumps({"type": "OnServerClaimFailed", "message": "No server available. Waiting..."})
+                broadcast(matched_clients, match_message)
                 break
             print("Server found! Connecting players...")
-            broadcast(matched_clients, host_port)
+            match_message = json.dumps({"type": "OnServerReady", "message": host_port})
+            broadcast(matched_clients, match_message)
             await asyncio.sleep(0.1)  # so the message gets sent before closing the connection
             for ws in matched_clients:
                 await ws.close()
