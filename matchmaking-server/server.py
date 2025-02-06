@@ -96,7 +96,7 @@ async def main():
     accelbyte_py_sdk.initialize()
 
     if not localServer:
-        _, error = login_client()
+        _, error = login_client(auto_refresh=True)
         if error:
             print(error)
             exit(1)
