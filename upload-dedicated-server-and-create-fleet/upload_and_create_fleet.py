@@ -67,6 +67,9 @@ def create_fleet(image_id: str):
         print("Login failed:", err)
         exit(1)
 
+    # Construct the fleet configuration.
+    # Note one could consider the alternative of creating the `params` from JSON with:
+    # params = ApiFleetParameters.create_from_dict(json.loads(fleet_config_json))
     params = ApiFleetParameters.create(
         active=False,
         ds_host_configuration=ApiDSHostConfigurationParameters.create(

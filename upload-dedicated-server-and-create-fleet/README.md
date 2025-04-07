@@ -41,7 +41,7 @@ python3 upload_and_create_fleet.py
 To build the Docker container, navigate to the directory containing the `Dockerfile` and run the following command:
 
 ```sh
-docker build -t upload-script .
+docker build -t ds-upload-and-create-fleet .
 ```
 
 ## Running the Docker Image
@@ -55,8 +55,8 @@ docker run --rm \
     -e AB_CLIENT_ID=your_client_id \
     -e AB_CLIENT_SECRET=your_client_secret \
     -v ./example_dedicated_server:/app/example_dedicated_server \
-    --name upload-script \
-    upload-script
+    --name ds-upload-and-create-fleet \
+    ds-upload-and-create-fleet
 ```
 
 Replace `<your_base_url>`, `<your_namespace>`, `<your_client_id>`, and `<your_client_secret>` with the appropriate values for your environment.
