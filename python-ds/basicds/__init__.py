@@ -1,0 +1,1 @@
+# BasicDS - AccelByte Multiplayer Servers Compatible Dedicated Server

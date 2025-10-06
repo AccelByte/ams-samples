@@ -1,0 +1,12 @@
+[project]
+name = "basicds"
+version = "0.1.0"
+description = "Python-based Dedicated Server for AccelByte Multiplayer Servers (AMS)"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "websocket-client>=1.8.0",
+]
+
+[project.scripts]
+basicds = "basicds.main:main"
