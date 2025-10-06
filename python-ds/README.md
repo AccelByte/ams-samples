@@ -14,7 +14,7 @@ A Python-based Dedicated Server for use with AccelByte Multiplayer Servers (AMS)
 uv sync
 
 # Run for development
-uv run python -m basicds.main --dsid ds_0199ba9d-b79a-7d02-9390-c9fdc1cd3af0
+uv run -m basicds.main --dsid ds_0199ba9d-b79a-7d02-9390-c9fdc1cd3af0
 
 # Build for deployment
 ./build.sh && cd dist && ./start.sh --dsid ds_0199ba9d-b79a-7d02-9390-c9fdc1cd3af0
@@ -31,7 +31,7 @@ uv run python -m basicds.main --dsid ds_0199ba9d-b79a-7d02-9390-c9fdc1cd3af0
 ### Examples
 #### Run for Development
 ```bash
-uv run python -m basicds.main --dsid ds_0199ba9d-b79a-7d02-9390-c9fdc1cd3af0 --log-level DEBUG
+uv run -m basicds.main --dsid ds_0199ba9d-b79a-7d02-9390-c9fdc1cd3af0 --log-level DEBUG
 ```
 #### Build, test, and upload packages
 ```bash
