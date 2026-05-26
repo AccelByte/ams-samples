@@ -1,0 +1,58 @@
+{
+    "name": "New Fleet",
+    "active": false,
+    "onDemand": false,
+    "isLocal": false,
+    "imageDeploymentProfile": {
+        "imageId": "img_XXX",
+        "timeout": {
+            "creation": 30,
+            "session": 600,
+            "drain": 60,
+            "unresponsive": 60
+        },
+        "portConfigurations": [
+            {
+                "name": "default",
+                "protocol": "UDP"
+            }
+        ],
+        "commandLine": "-dsid=${dsid} -port=${default_port} -LogCmds=LogAccelByteAMS VeryVerbose"
+    },
+    "dsHostConfiguration": {
+        "instanceId": "01884fee-1e9b-7b1b-b0d3-ab01420951d5",
+        "serversPerVm": 1
+    },
+    "regions": [
+        {
+            "region": "us-west-2",
+            "bufferSize": 1,
+            "minServerCount": 0,
+            "maxServerCount": 10,
+            "state": "active"
+        }
+    ],
+    "claimKeys": ["test"],
+    "samplingRules": {
+        "logs": {
+            "crashed": {
+                "collect": true,
+                "percentage": 100
+            },
+            "success": {
+                "collect": true,
+                "percentage": 100
+            },
+            "unclaimed": {
+                "collect": true,
+                "percentage": 100
+            }
+        },
+        "coredumps": {
+            "crashed": {
+                "collect": true,
+                "percentage": 100
+            }
+        }
+    }
+}

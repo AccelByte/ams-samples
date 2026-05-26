@@ -1,0 +1,5 @@
+tools/
+fleet_deploy.json
+.ams-upload-client.json
+.claude/settings.local.json
+.vscode/launch.json
