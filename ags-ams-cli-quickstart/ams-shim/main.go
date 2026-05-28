@@ -58,6 +58,8 @@ func main() {
 		log.Fatal("missing required -dsid argument")
 	}
 
+	ensureExecutable(executable)
+
 	cmd := exec.Command(executable, childArgs...)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stdout
@@ -217,6 +219,19 @@ func waitForPort(port int, ctx context.Context) {
 		case <-ctx.Done():
 			return
 		}
+	}
+}
+
+func ensureExecutable(path string) {
+	info, err := os.Stat(path)
+	if err != nil {
+		log.Fatalf("cannot stat %q: %v", path, err)
+	}
+	if info.Mode()&0111 == 0 {
+		if err := os.Chmod(path, info.Mode()|0111); err != nil {
+			log.Fatalf("cannot chmod %q: %v", path, err)
+		}
+		log.Printf("set executable bit on %s", path)
 	}
 }
 

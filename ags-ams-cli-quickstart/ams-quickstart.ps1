@@ -23,6 +23,13 @@
 
 .PARAMETER SkipClientCreation
     Skip creating an AMS upload client; you will be prompted for an existing client ID and secret.
+
+.PARAMETER SkipAmsShim
+    Disable ams-shim injection. By default the shim is copied into the build and set as the upload
+    executable so that an unmodified DS can speak the AMS watchdog protocol.
+
+.PARAMETER AmsShimBinary
+    Path to a pre-built amsshim Linux binary. Defaults to ams-shim\amsshim next to the script.
 #>
 param(
     [string]$BaseUrl          = "",
@@ -31,7 +38,9 @@ param(
     [string]$Executable       = "",
     [string]$ImageName        = "",
     [string]$FleetName        = "",
-    [switch]$SkipClientCreation
+    [switch]$SkipClientCreation,
+    [switch]$SkipAmsShim,
+    [string]$AmsShimBinary    = ""
 )
 
 $ErrorActionPreference = "Stop"
@@ -317,12 +326,31 @@ function Get-ExistingClient {
     $Cfg.UploadClientSecret = Read-Required "AMS uploader client secret"
 }
 
-# ── Step 5 · Upload build ──────────────────────────────────────────────────────
+# ── Step 5 · Inject ams-shim ──────────────────────────────────────────────────
+
+function Add-AmsShim {
+    Write-Step "Injecting ams-shim"
+
+    $shimSrc = if ($AmsShimBinary) { $AmsShimBinary } else { Join-Path $ScriptDir "ams-shim\amsshim" }
+
+    if (-not (Test-Path $shimSrc)) {
+        throw "amsshim binary not found at '$shimSrc'.`nBuild it first from the ams-shim directory:`n  CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -trimpath -ldflags=`"-s -w`" -o amsshim .`nOr pass -SkipAmsShim to upload without the shim."
+    }
+
+    $shimDest = Join-Path $Cfg.BuildPath "amsshim"
+    Copy-Item -Path $shimSrc -Destination $shimDest -Force
+    Write-Ok "Copied amsshim → $shimDest"
+
+    $Cfg.UseShim = $true
+}
+
+# ── Step 6 · Upload build ──────────────────────────────────────────────────────
 
 function Invoke-Upload {
     Write-Step "Uploading build"
+    $uploadExe = if ($Cfg.UseShim) { "amsshim" } else { $Cfg.Executable }
     Write-Info "Path      : $($Cfg.BuildPath)"
-    Write-Info "Executable: $($Cfg.Executable)"
+    Write-Info "Executable: $uploadExe$(if ($Cfg.UseShim) { " (wrapping $($Cfg.Executable))" })"
     Write-Info "Image name: $($Cfg.ImageName)"
     Write-Host ""
 
@@ -334,7 +362,7 @@ function Invoke-Upload {
         "-s", $Cfg.UploadClientSecret,
         "-n", $Cfg.ImageName,
         "-p", $Cfg.BuildPath,
-        "-e", $Cfg.Executable
+        "-e", $uploadExe
     )
     if ($Cfg.Executable -like "*.sh") { $uploadArgs += @("-a", "linux-x86_64") }
 
@@ -454,6 +482,10 @@ function New-Fleet {
     $fleet.imageDeploymentProfile.imageId       = $Cfg.ImageId
     $fleet.dsHostConfiguration.instanceId       = $Cfg.InstanceId
     $fleet.regions[0].region                    = $Cfg.Region
+    if ($Cfg.UseShim) {
+        $exeArg = if ($Cfg.Executable -notmatch '[/\\]') { "./$($Cfg.Executable)" } else { $Cfg.Executable }
+        $fleet.imageDeploymentProfile.commandLine = "$exeArg $($fleet.imageDeploymentProfile.commandLine)"
+    }
 
     $fleetJsonPath = Write-TempJson $fleet
     Write-Info "Fleet config written to $fleetJsonPath"
@@ -484,6 +516,7 @@ try {
         New-UploadClient
     }
 
+    if (-not $SkipAmsShim) { Add-AmsShim }
     Invoke-Upload
     Get-ImageId
     Select-Instance
