@@ -2,6 +2,8 @@
 
 A lightweight shim that adapts an unmodified Unreal dedicated server to [AccelByte Multiplayer Servers (AMS)](https://docs.accelbyte.io/gaming-services/modules/multiplayer/multiplayer-servers/) by implementing the [AMS watchdog protocol](https://docs.accelbyte.io/gaming-services/modules/multiplayer/multiplayer-servers/ams-watchdog-protocol/) on behalf of the DS.
 
+*NOTE* - this is exclusively intended for quickly getting started and trying out AMS before making any DS code modification/integration. It is *NOT* an good production solution as the drain logic does not take into account whether the DS is serving a session or not (it has no way to know).  
+
 ## How it works
 
 AMS expects a dedicated server to connect to its watchdog, send heartbeats, and signal when it is ready to accept players. Rather than modifying the DS, `amsshim` wraps it:
@@ -24,10 +26,10 @@ The DS ID and port are read from the arguments passed to `amsshim` — they are 
 
 **Example:**
 ```sh
-amsshim ./myds -dsid=ds_1234 -port=7777 -log
+./amsshim ./myds -dsid=ds_019e6feb-7e90-7699-9395-1638ed11d433 -port=7777 -log
 ```
 
-This launches `./myds -dsid=ds_1234 -port=7777 -log` as a child process. `amsshim` extracts `ds_1234` for the watchdog connection and watches port `7777` to determine when the DS is ready.
+This launches `./myds -dsid=ds_019e6feb-7e90-7699-9395-1638ed11d433 -port=7777 -log` as a child process. `amsshim` extracts `ds_019e6feb-7e90-7699-9395-1638ed11d433` for the watchdog connection and watches port `7777` to determine when the DS is ready.
 
 ### Arguments
 
@@ -38,7 +40,7 @@ This launches `./myds -dsid=ds_1234 -port=7777 -log` as a child process. `amsshi
 
 ### Ready detection
 
-`amsshim` polls `/proc/net/tcp`, `/proc/net/tcp6`, `/proc/net/udp`, and `/proc/net/udp6` every 500ms looking for the DS port as a bound local address. This works for any transport protocol (TCP or UDP). If `-port` is omitted, the ready signal is sent after a 5-second delay instead.
+`amsshim` polls `/proc/net/tcp`, `/proc/net/tcp6`, `/proc/net/udp`, and `/proc/net/udp6` every 500ms looking for the DS port as a bound local address. This works for any transport protocol (TCP or UDP). If the port is not detected within 30 seconds, the ready signal is sent anyway.
 
 ## Building
 
